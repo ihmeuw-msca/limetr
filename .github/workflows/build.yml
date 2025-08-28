@@ -9,56 +9,75 @@ permissions:
   contents: write
 
 jobs:
-  build:
-    name: Test and Build on ${{ matrix.os }} with Python ${{ matrix.python-version }}
+  # --------------------------------------------------------------------------
+  # 1) Test across OS and Python versions
+  # --------------------------------------------------------------------------
+  test:
+    name: Test on ${{ matrix.os }} / Python ${{ matrix.python }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest, macos-13, macos-latest]
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        python: ["3.10", "3.11", "3.12", "3.13"]
 
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Set up Python ${{ matrix.python-version }}
+
+      - name: Set up Python ${{ matrix.python }}
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ matrix.python }}
 
-      - name: Install dependencies
+      - name: Install package (with test extras)
         run: |
-          python -m pip install --upgrade pip setuptools wheel build
+          python -m pip install --upgrade pip
           python -m pip install -e ".[test]"
 
       - name: Run tests
         run: |
           pytest -v tests/ --cov=limetr --cov-report=xml
 
-      - name: Build package
+  # --------------------------------------------------------------------------
+  # 2) Build artifacts once (universal wheel + sdist)
+  #    This job only depends on tests passing.
+  # --------------------------------------------------------------------------
+  build:
+    name: Build artifacts (sdist + universal wheel)
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build sdist and wheel
         run: |
-          python -m build --wheel --sdist
+          python -m pip install --upgrade pip build
+          python -m build --sdist --wheel
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build-${{ matrix.os }}-py${{ matrix.python-version }}
-          path: |
-            dist/*.whl
-            dist/*.tar.gz
+          name: dist
+          path: dist/*
 
+  # --------------------------------------------------------------------------
+  # 3) Publish to PyPI when a release is published
+  # --------------------------------------------------------------------------
   deploy:
     name: Deploy to PyPI
     needs: build
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'release' && github.event.action == 'published' }}
-    
     steps:
-      - name: Download all build artifacts
+      - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
+          name: dist
           path: dist
-          pattern: build-*
-          merge-multiple: true
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
