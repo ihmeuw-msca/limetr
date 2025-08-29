@@ -3,7 +3,6 @@
 [![PyPI](https://img.shields.io/pypi/v/limetr?color=purple)](https://pypi.org/project/limetr/)
 ![Python](https://img.shields.io/badge/python-3.10,_3.11,_3.12,_3.13-purple.svg)
 [![License](https://img.shields.io/pypi/l/limetr?color=purple)](https://github.com/ihmeuw-msca/limetr/blob/main/LICENSE)
-[![Version](https://img.shields.io/pypi/v/limetr?color=purple)](https://pypi.org/project/limetr)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/ihmeuw-msca/limetr/python-build.yml?branch=main)](https://github.com/ihmeuw-msca/limetr/actions)
 [![PyPI Downloads](https://static.pepy.tech/personalized-badge/limetr?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=MAGENTA&left_text=Downloads)](https://pepy.tech/projects/limetr)
 
