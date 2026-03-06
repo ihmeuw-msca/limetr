@@ -19,18 +19,18 @@ from limetr.variable import FeVariable, ReVariable
 
 class LimeTr:
     """
-    LimeTr model class
+    LimeTr model class.
 
     Attributes
     ----------
     data : Data
-        Data object contains the observations
+        Data object contains the observations.
     fevar : FeVariable
-        Fixed effects variable
+        Fixed effects variable.
     revar : ReVariable
-        Random effects variable
+        Random effects variable.
     inlier_pct : float
-        Inlier percentage
+        Inlier percentage.
 
     Methods
     -------
@@ -45,11 +45,11 @@ class LimeTr:
     get_obsvar()
         Compute trimming weighted observation variance.
     get_varmat(gamma)
-        Compute trimming weighted variance covariance matrix of the likelihood
+        Compute trimming weighted variance covariance matrix of the likelihood.
     objective(var)
-        Objective function of the optimization problem
+        Objective function of the optimization problem.
     gradient(var)
-        Gradient function of the optimization problem
+        Gradient function of the optimization problem.
     hessian(var)
         Hessian function of the optimization problem, approximated by the Fisher
         information matrix.
@@ -57,10 +57,11 @@ class LimeTr:
         Detect outlier based on the statistical model and given variable.
     get_model_init()
         Compute model initialization.
-    fit_model(var=None, num_tr_steps=3, options=None)
+    fit_model(var=None, trim_steps=3, options=None)
         Run optimization algorithm to get solution.
     get_random_effects(var)
         Given estimate of beta and gamma, return the estimate of random effects.
+
     """
 
     def __init__(
@@ -73,14 +74,14 @@ class LimeTr:
         """
         Parameters
         ----------
-        data : Data
+        data
             Data object contains the observations.
-        fevar : FeVariable
+        fevar
             Fixed effects variable.
-        revar : ReVariable
+        revar
             Random effects variable.
-        inlier_pct : float, optional
-            Inlier percentage, by default 1
+        inlier_pct
+            Inlier percentage, by default 1.
 
         Raises
         ------
@@ -90,6 +91,7 @@ class LimeTr:
             When random effects shape not matching with the data.
         ValueError
             When the inlier percentage is outside zero to one interval.
+
         """
 
         if data.num_obs != fevar.mapping.shape[0]:
@@ -112,12 +114,14 @@ class LimeTr:
 
         Parameters
         ----------
-        var : NDArray
+        var
+            Combined variable array.
 
         Returns
         -------
         tuple[NDArray, NDArray]
             Return beta and gamma.
+
         """
         beta, gamma = tuple(
             split_by_sizes(var, [self.fevar.size, self.revar.size])
@@ -127,16 +131,18 @@ class LimeTr:
 
     def get_residual(self, beta: NDArray) -> NDArray:
         """
-        Compute trimming weighted residual
+        Compute trimming weighted residual.
 
         Parameters
         ----------
-        beta : NDArray
+        beta
+            Fixed effects coefficients.
 
         Returns
         -------
         NDArray
-            Weighted residual
+            Weighted residual.
+
         """
         return self.data.weight * (self.data.obs - self.fevar.mapping(beta))
 
@@ -146,12 +152,14 @@ class LimeTr:
 
         Parameters
         ----------
-        beta : NDArray
+        beta
+            Fixed effects coefficients.
 
         Returns
         -------
         NDArray
             Weighted Jacobian matrix of fixed effects.
+
         """
         return self.data.weight[:, None] * self.fevar.mapping.jac(beta)
 
@@ -163,32 +171,36 @@ class LimeTr:
         -------
         NDArray
             Weighted design matrix of random effects.
+
         """
         return self.data.weight[:, None] * self.revar.mapping.mat
 
     def get_obsvar(self) -> NDArray:
         """
-        Compute trimming weighted observation variance
+        Compute trimming weighted observation variance.
 
         Returns
         -------
         NDArray
-            Weighted observation variance
+            Weighted observation variance.
+
         """
         return self.data.obs_se ** (2 * self.data.weight)
 
     def get_varmat(self, gamma: NDArray) -> BDLMat:
         """
-        Compute trimming weighted variance covariance matrix of the likelihood
+        Compute trimming weighted variance covariance matrix of the likelihood.
 
         Parameters
         ----------
-        gamma : NDArray
+        gamma
+            Random effects variance components.
 
         Returns
         -------
         BDLMat
             Weighted variance covariance matrix of the likelihood.
+
         """
         return BDLMat(
             self.get_obsvar(),
@@ -202,12 +214,14 @@ class LimeTr:
 
         Parameters
         ----------
-        var : NDArray
+        var
+            Combined variable array.
 
         Returns
         -------
         float
             Objective function value.
+
         """
         beta, gamma = self.get_vars(var)
         r = self.get_residual(beta)
@@ -221,16 +235,18 @@ class LimeTr:
 
     def gradient(self, var: NDArray) -> NDArray:
         """
-        Gradient function of the optimization problem
+        Gradient function of the optimization problem.
 
         Parameters
         ----------
-        var : NDArray
+        var
+            Combined variable array.
 
         Returns
         -------
         NDArray
             Gradient at given variable.
+
         """
         beta, gamma = self.get_vars(var)
         r = self.get_residual(beta)
@@ -258,12 +274,14 @@ class LimeTr:
 
         Parameters
         ----------
-        var : NDArray
+        var
+            Combined variable array.
 
         Returns
         -------
         NDArray
             Hessian at given variable.
+
         """
         beta, gamma = self.get_vars(var)
         sqrt_gamma = np.sqrt(gamma)
@@ -288,16 +306,18 @@ class LimeTr:
 
     def detect_outliers(self, var: NDArray) -> NDArray:
         """
-        Detect outlier based on the statistical model and given variable
+        Detect outlier based on the statistical model and given variable.
 
         Parameters
         ----------
-        var : NDArray
+        var
+            Combined variable array.
 
         Returns
         -------
         NDArray
             Boolean mask of outliers.
+
         """
         beta, gamma = self.get_vars(var)
         r = self.data.obs - self.fevar.mapping(beta)
@@ -310,12 +330,13 @@ class LimeTr:
 
     def get_model_init(self) -> NDArray:
         """
-        Get model initializations
+        Get model initializations.
 
         Returns
         -------
         NDArray
             Return the initialization variables.
+
         """
         beta = np.zeros(self.fevar.size)
         gamma = np.zeros(self.revar.size)
@@ -333,14 +354,15 @@ class LimeTr:
         options: dict | None = None,
     ) -> None:
         """
-        (Inner) Fit model function
+        (Inner) Fit model function.
 
         Parameters
         ----------
-        var : NDArray | None, optional
-            Initial guess of the variable, by default None
-        options : dict | None, optional
-            scipy optimizer options, by default None
+        var
+            Initial guess of the variable, by default None.
+        options
+            scipy optimizer options, by default None.
+
         """
         var = self.get_model_init() if var is None else var.copy()
 
@@ -385,21 +407,22 @@ class LimeTr:
         options: dict | None = None,
     ) -> None:
         """
-        Fit model function
+        Fit model function.
 
         Parameters
         ----------
-        var : NDArray | None, optional
-            Initial guess of the variable, by default None
-        trim_steps : int, optional
-            Number of trimming steps, by default 3
-        options : dict | None, optional
-            scipy optimizer options, by default None
+        var
+            Initial guess of the variable, by default None.
+        trim_steps
+            Number of trimming steps, by default 3.
+        options
+            scipy optimizer options, by default None.
 
         Raises
         ------
         ValueError
-            When ``num_tr_steps`` is strictly less than 2.
+            When ``trim_steps`` is strictly less than 2.
+
         """
 
         trim_steps = int(trim_steps)
@@ -418,16 +441,18 @@ class LimeTr:
 
     def get_random_effects(self, var: NDArray) -> NDArray:
         """
-        Estimate random effects given beta and gamma
+        Estimate random effects given beta and gamma.
 
         Parameters
         ----------
-        var : NDArray
+        var
+            Combined variable array.
 
         Returns
         -------
         NDArray
             An array contains random effects.
+
         """
         beta, gamma = self.get_vars(var)
         residual = split_by_sizes(
@@ -451,7 +476,7 @@ class LimeTr:
 
     @property
     def soln(self) -> dict[str, NDArray]:
-        """Solution summary"""
+        """Solution summary."""
         if self.result is None:
             raise ValueError("Please fit the model first.")
         beta, gamma = self.get_vars(self.result.x)

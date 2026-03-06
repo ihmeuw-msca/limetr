@@ -18,27 +18,28 @@ def funnel(
     summarize: bool = True,
 ) -> Axes:
     """
-    Create funnel plot of the model
+    Create funnel plot of the model.
 
     Parameters
     ----------
-    model : LimeTr
-        Given fitting model
-    ax : Axes | None, optional
+    model
+        Given fitting model.
+    ax
         Plot axis, by default ``None``. If ``None`` will create new axis.
-    sd_ub : float, optional
+    sd_ub
         Quantile upper bound of total standard deviation, by default 1.
-    ui_bounds : tuple[float, float] | None, optional
+    ui_bounds
         Quantile bounds of uncertainty interval, by default ``None``.
         If ``None`` it will be inferred from ``model.inlier_pct``.
-    summarize : bool, optional
-        If ``summarize``, a text box with information will be printed out,
-        default by ``True``.
+    summarize
+        If ``True``, a text box with information will be printed out,
+        by default ``True``.
 
     Returns
     -------
     Axes
         Axis used to plot the funnel.
+
     """
     # inputs
     ax = plt.subplots()[1] if ax is None else ax

@@ -21,11 +21,11 @@ def split_by_sizes(
 
     Parameters
     ----------
-    array : ndarray
+    array
         The array need to be splitted.
-    sizes : list[int]
+    sizes
         A list of sizes for each sub-array.
-    axis: int, optional
+    axis
         Along which axis, array will be splitted, default is 0.
 
     Raises
@@ -38,6 +38,7 @@ def split_by_sizes(
     -------
     list[ndarray]
         A list of splitted array.
+
     """
     assert array.shape[axis] == sum(sizes)
     return np.split(array, np.cumsum(sizes)[:-1], axis=axis)
@@ -51,6 +52,7 @@ def empty_array() -> NDArray:
     -------
     NDArray
         An empty array with ``dtype`` being ``float``.
+
     """
     return np.array([])
 
@@ -79,9 +81,9 @@ def default_vec_factory(
 
     Raises
     ------
-    AssertionError
+    ValueError
         If ``vec`` is empty and ``default_value`` is ``None``.
-    AssertionError
+    ValueError
         If ``vec`` is ``Iterable`` and length does not equal to ``size``.
 
     Returns
@@ -111,14 +113,14 @@ def iterable(__obj: object) -> bool:
 
     Parameters
     ----------
-
-    __obj : object
+    __obj
         Object to be examed.
 
     Returns
     -------
     bool
         ``True`` if object is iterable, and ``False`` otherwise.
+
     """
     return isinstance(__obj, Iterable)
 
@@ -129,13 +131,14 @@ def has_no_repeat(array: np.ndarray) -> bool:
 
     Parameters
     ----------
-    array : ndarray
+    array
         Array that need to be examed.
 
     Returns
     -------
     bool
         ``True`` if array has no repeat values, and ``False`` otherwise.
+
     """
     return array.size == np.unique(array).size
 
@@ -147,13 +150,14 @@ def sizes_to_slices(sizes: Sequence[int]) -> list[slice]:
 
     Parameters
     ----------
-    sizes : Iterable[int]
+    sizes
         Iterable object contains positive integers as the sizes of the arrays.
 
     Returns
     -------
     list[slice]
         A list of ``slice`` to access each sub-array in the original array.
+
     """
     ends = np.cumsum(sizes)
     starts = np.insert(ends, 0, 0)[:-1]
@@ -166,13 +170,14 @@ def get_maxlen(objs: list[Any]) -> int:
 
     Parameters
     ----------
-    objs : list[Any]
+    objs
         A list of objects.
 
     Returns
     -------
     int
         Maximum length among objects.
+
     """
     return max([len(obj) if iterable(obj) else 1 for obj in objs])
 
@@ -183,9 +188,9 @@ def broadcast(objs: list[Any], size: int) -> np.ndarray:
 
     Parameters
     ----------
-    objs : list[Any]
+    objs
         A list of objects.
-    size : int
+    size
         Size for the broadcasting.
 
     Raises
@@ -198,6 +203,7 @@ def broadcast(objs: list[Any], size: int) -> np.ndarray:
     -------
     np.ndarray
         Two dimensional array that stores the squared objects.
+
     """
     size = int(size)
     assert size >= 0, "Size has to be a non-negative integer."

@@ -23,6 +23,7 @@ class SmoothMapping:
         Mapping function.
     jac: Callable
         Jacobian function of the mapping.
+
     """
 
     def __init__(
@@ -34,11 +35,11 @@ class SmoothMapping:
         """
         Parameters
         ----------
-        shape : tuple[int, int]
+        shape
             Shape of the mapping.
-        fun : Callable
+        fun
             Mapping function.
-        jac : Callable
+        jac
             Jacobian function of the mapping.
 
         Raises
@@ -49,6 +50,7 @@ class SmoothMapping:
             If ``fun`` is not callable.
         AssertionError
             If ``jac`` is not callable.
+
         """
         assert (
             isinstance(shape, tuple)
@@ -67,13 +69,14 @@ class SmoothMapping:
 
         Parameters
         ----------
-        fun : Callable
-            Function to be decorated
+        fun
+            Function to be decorated.
 
         Returns
         -------
         Callable
-            Function that valide the input.
+            Function that validates the input.
+
         """
 
         def decorated_fun(x: NDArray) -> NDArray:
@@ -99,14 +102,16 @@ class LinearMapping(SmoothMapping):
     ----------
     mat: ndarray
         Matrix as the linear mapping.
+
     """
 
     def __init__(self, mat: NDArray):
         """
         Parameters
         ----------
-        mat : NDArray
+        mat
             Matrix as the linear mapping.
+
         """
         mat = np.asarray(mat)
         assert mat.ndim == 2, "`mat` must be a matrix."

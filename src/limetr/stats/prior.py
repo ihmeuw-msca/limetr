@@ -16,35 +16,19 @@ class Prior:
     """
     Generic prior class, need to be inherited.
 
-    Attributes
+    Parameters
     ----------
-    info : ndarray
-        Information array of the prior.
-    size : int
-        Size of the prior.
+    info
+        Information of the prior. Length of the list is number of
+        information components. Each component can be either scalar or a
+        vector. If there are more than one vector with size more than one,
+        the size of the vectors need to match. By default ``None``.
+    size
+        Size of the prior, by default 0.
 
-    Methods
-    -------
-    objective(var)
-        Objective function of optimization interface
-    gradient(var)
-        Gradient function of optimization interface
-    hessian(var)
-        Hessian function of the optimization interface
     """
 
     def __init__(self, info: list[Any] | None = None, size: int = 0):
-        """
-        Parameters
-        ----------
-        info : list[Any] | None
-            Information of the prior. Length of the list is number of
-            information components. Each component can be either scalar or a
-            vector. If there are more than one vector with size more than one,
-            the size of the vectors need to match. By default ``None``.
-        size : int, optional
-            Size of the prior, by default 0.
-        """
         size = max(int(size), get_maxlen(info))
         info = broadcast(info, size)
         self.info = info
@@ -57,6 +41,7 @@ class Prior:
         -------
         bool
             If prior has zero size.
+
         """
         return self.size == 0
 
@@ -68,13 +53,14 @@ class Prior:
 
         Parameters
         ----------
-        var : NDArray
+        var
             Variable that prior is acting on.
 
         Returns
         -------
         float
             Objective value regarding the log likelihood of the prior.
+
         """
         return 0.0
 
@@ -84,13 +70,14 @@ class Prior:
 
         Parameters
         ----------
-        var : NDArray
+        var
             Variable that prior is acting on.
 
         Returns
         -------
         NDArray
             Gradient value regarding the log likelihood of the prior.
+
         """
         return np.zeros(len(var))
 
@@ -100,13 +87,14 @@ class Prior:
 
         Parameters
         ----------
-        var : NDArray
+        var
             Variable that prior is acting on.
 
         Returns
         -------
         NDArray
             Hessian value regarding the log likelihood of the prior.
+
         """
         return np.zeros((len(var), len(var)))
 
@@ -118,12 +106,20 @@ class GaussianPrior(Prior):
     """
     Gaussian Prior
 
-    Attributes
+    Parameters
     ----------
-        mean : ndarray
-            Mean vector of the prior.
-        sd : ndarray
-            Standard deviation vector of the prior.
+    mean
+        Mean of the Gaussian prior, by default 0.
+    sd
+        Standard deviation of the Gaussian prior, by default inf.
+    size
+        Size of the prior, by default 0.
+
+    Raises
+    ------
+    ValueError
+        If any standard deviations are less or equal to zero.
+
     """
 
     def __init__(
@@ -132,21 +128,6 @@ class GaussianPrior(Prior):
         sd: Number | Iterable = np.inf,
         size: int = 0,
     ):
-        """
-        Parameters
-        ----------
-        mean : Number | Iterable, optional
-            Mean of the Gaussian prior, by default 0.
-        sd : Number | Iterable, optional
-            Standard deviation of the Gaussian prior, by default inf.
-        size : int, optional
-            Size of the prior, by default 0.
-
-        Raises
-        ------
-        ValueError
-            If any standard deviations are less or equal to zero.
-        """
         super().__init__([mean, sd], size=size)
         if not all(self.info[1] > 0):
             raise ValueError("Standard deviations have to be positive numbers.")
@@ -171,12 +152,20 @@ class UniformPrior(Prior):
     """
     Uniform Prior
 
-    Attributes
+    Parameters
     ----------
-        lb : ndarray
-            Lower bounds of the prior.
-        ub : ndarray
-            Upper bounds of the prior.
+    lb
+        Lower bounds of the prior, by default -inf.
+    ub
+        Upper bounds of the prior, by default inf.
+    size
+        Size of the prior, by default 0.
+
+    Raises
+    ------
+    ValueError
+        If any lower bounds are greater than upper bounds.
+
     """
 
     def __init__(
@@ -185,21 +174,6 @@ class UniformPrior(Prior):
         ub: Number | Iterable = np.inf,
         size: int = 0,
     ):
-        """
-        Parameters
-        ----------
-        lb : Number | Iterable, optional
-            Lower bounds of the prior, by default -inf
-        ub : Number | Iterable, optional
-            Upper bounds of the prior, by default inf
-        size : int, optional
-            Size of the prior, by default 0
-
-        Raises
-        ------
-        ValueError
-            If any lower bounds are greater than upper bounds.
-        """
         super().__init__([lb, ub], size=size)
         if any(self.info[0] > self.info[1]):
             raise ValueError(
@@ -216,21 +190,16 @@ class LinearPrior(Prior):
     """
     Linear Prior
 
-    Attributes
+    Parameters
     ----------
-    mat: ndarray
+    mat
         Linear mapping (matrix).
+    info
+        Information array of the prior.
+
     """
 
     def __init__(self, mat: Iterable, info: list[Any]):
-        """
-        Parameters
-        ----------
-        mat : Iterable
-            Linear mapping (matrix).
-        info : list[Any]
-            Information array of the prior.
-        """
         mat = np.asarray(mat)
         if mat.ndim != 2:
             raise ValueError("`mat` has to be a matrix.")
@@ -244,6 +213,16 @@ class LinearPrior(Prior):
 class LinearGaussianPrior(LinearPrior, GaussianPrior):
     """
     Linear Gaussian Prior
+
+    Parameters
+    ----------
+    mat
+        Linear mapping (matrix).
+    mean
+        Mean of the prior, by default 0.0.
+    sd
+        Standard deviation of the prior, by default inf.
+
     """
 
     def __init__(
@@ -252,16 +231,6 @@ class LinearGaussianPrior(LinearPrior, GaussianPrior):
         mean: Number | Iterable = 0.0,
         sd: Number | Iterable = np.inf,
     ):
-        """
-        Parameters
-        ----------
-        mat : Iterable
-            Linear mapping(matrix).
-        mean : Number | Iterable, optional
-            Mean of the prior, by default 0.0.
-        sd : Number | Iterable, optional
-            Standard deviation of the prior, by default inf.
-        """
         LinearPrior.__init__(self, mat, [mean, sd])
         GaussianPrior.__init__(self, self.info[0], self.info[1], size=self.size)
 
@@ -284,6 +253,16 @@ class LinearGaussianPrior(LinearPrior, GaussianPrior):
 class LinearUniformPrior(LinearPrior, UniformPrior):
     """
     Linear Uniform Prior
+
+    Parameters
+    ----------
+    mat
+        Linear mapping (matrix).
+    lb
+        Lower bounds of the prior, by default -inf.
+    ub
+        Upper bounds of the prior, by default inf.
+
     """
 
     def __init__(
@@ -292,16 +271,6 @@ class LinearUniformPrior(LinearPrior, UniformPrior):
         lb: Number | Iterable = -np.inf,
         ub: Number | Iterable = np.inf,
     ):
-        """
-        Parameters
-        ----------
-        mat : Iterable
-            Linear mapping(matrix).
-        lb : Number | Iterable, optional
-            Lower bounds of the prior, by default -inf.
-        ub : Number | Iterable, optional
-            Upper bounds of the prior, by default inf.
-        """
         LinearPrior.__init__(self, mat, [lb, ub])
         UniformPrior.__init__(self, self.info[0], self.info[1], size=self.size)
 

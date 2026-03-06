@@ -30,6 +30,7 @@ class Data:
         as a group by itself.
     weight : NDArray
         Weights for each observation. Default is one for each observation.
+
     """
 
     def __init__(
@@ -42,14 +43,15 @@ class Data:
         """
         Parameters
         ----------
-        obs : Iterable
+        obs
             Observations. Assumed to be sorted by the group id.
-        obs_se : Number | Iterable, optional
+        obs_se
             Standard deviations of observation. Default is one.
-        group_sizes : Iterable[int] | None, optional
+        group_sizes
             Number of observations for each group. Default is ``None``.
-        weight : Number | Iterable, optional
+        weight
             Weights for each observation. Default is one.
+
         """
         self.obs = obs
         self.obs_se = obs_se
@@ -58,12 +60,12 @@ class Data:
 
     @property
     def num_obs(self) -> int:
-        """Number of observations"""
+        """Number of observations."""
         return self.obs.size
 
     @property
     def num_groups(self) -> int:
-        """Number of groups"""
+        """Number of groups."""
         return self.group_sizes.size
 
     obs = property(operator.attrgetter("_obs"))
