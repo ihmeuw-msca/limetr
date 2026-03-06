@@ -5,12 +5,11 @@ utils
 Helper functions.
 """
 
-from collections.abc import Iterable
-from numbers import Number
+from collections.abc import Iterable, Sequence
 from typing import Any
 
 import numpy as np
-from numpy.typing import NDArray
+from numpy.typing import ArrayLike, NDArray
 
 
 def split_by_sizes(
@@ -57,24 +56,24 @@ def empty_array() -> NDArray[np.floating]:
 
 
 def default_vec_factory(
-    vec: Number | Iterable,
+    vec: ArrayLike,
     size: int,
     default_value: Any = None,
     vec_name: str = "vector",
-) -> NDArray[np.floating]:
+) -> NDArray:
     """
     Function that automatically create and fill values of a vector.
 
     Parameters
     ----------
-    vec : Number | Iterable
+    vec
         A vector or number that need to be checked or expand.
-    size : int
+    size
         The desired size of the vector.
-    default_value : Any, optional
+    default_value
         Default value of the vector, will be used when ``vec`` is empty.
         Default is ``None``.
-    vec_name : str, optional
+    vec_name
         Name of the vector, for more informative error message.
         Default to be ``'vector'``.
 
@@ -87,44 +86,23 @@ def default_vec_factory(
 
     Returns
     -------
-    NDArray[np.floating]
+    NDArray
         Final processed array.
+
     """
-    if np.isscalar(vec):
-        vec = np.repeat(vec, size)
-    elif len(vec) == 0:
-        assert default_value is not None, (
-            "Must provide `default_value` when `vec` is empty."
-        )
-        vec = np.repeat(default_value, size)
-    else:
-        vec = np.asarray(vec)
-        check_size(vec, size, vec_name=vec_name)
+    result = np.asarray(vec)
+    if result.ndim == 0:
+        return np.repeat(result, size)
+    if len(result) == 0:
+        if default_value is None:
+            raise ValueError(
+                "Must provide `default_value` when `vec` is empty."
+            )
+        return np.repeat(default_value, size)
 
-    return vec
-
-
-def check_size(vec: Iterable, size: int, vec_name: str = "vector") -> None:
-    """
-    Function that check the size consistency.
-
-    Parameters
-    ----------
-    vec : Iterable
-        Iterable vector which length will be checked.
-    size : int
-        Desired size of the vector.
-    vec_name : str, optional
-        Name of the vector, for more informative error message.
-        Default to be ``'vector'``.
-
-    Raises
-    ------
-    ValueError
-        If vector length does not equal to provided ``size``.
-    """
-    if len(vec) != size:
+    if len(result) != size:
         raise ValueError(f"{vec_name} must be length {size}.")
+    return result
 
 
 def iterable(__obj: object) -> bool:
@@ -162,7 +140,7 @@ def has_no_repeat(array: np.ndarray) -> bool:
     return array.size == np.unique(array).size
 
 
-def sizes_to_slices(sizes: Iterable) -> list[slice]:
+def sizes_to_slices(sizes: Sequence[int]) -> list[slice]:
     """
     Function that convert sizes of sub-arrays to corresponding slices in the
     original array.

@@ -1,6 +1,7 @@
 # Test helper function in utils module
 import numpy as np
 import pytest
+
 import limetr.utils as utils
 
 
@@ -19,13 +20,9 @@ def test_empty_array():
 
 @pytest.mark.parametrize("vec", [[0, 1, 2]])
 @pytest.mark.parametrize("size", [2])
-def test_check_size_validate(vec, size):
+def test_default_vec_factory_size_mismatch(vec, size):
     with pytest.raises(ValueError):
-        utils.check_size(vec, size)
-
-
-def test_check_size():
-    utils.check_size([1, 2, 3], 3)
+        utils.default_vec_factory(vec, size)
 
 
 @pytest.mark.parametrize(("obj", "result"), [(3, False), ([3], True)])
