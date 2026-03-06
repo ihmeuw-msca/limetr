@@ -13,8 +13,8 @@ from numpy.typing import ArrayLike, NDArray
 
 
 def split_by_sizes(
-    array: np.ndarray, sizes: list[int], axis: int = 0
-) -> list[np.ndarray]:
+    array: NDArray, sizes: list[int], axis: int = 0
+) -> list[NDArray]:
     """
     Function that split an array into a list of arrays, provided the size for
     each sub-array size.
@@ -125,7 +125,7 @@ def iterable(__obj: object) -> bool:
     return isinstance(__obj, Iterable)
 
 
-def has_no_repeat(array: np.ndarray) -> bool:
+def has_no_repeat(array: NDArray) -> bool:
     """
     Function that check if an array have no repeat values.
 
@@ -182,7 +182,7 @@ def get_maxlen(objs: list[Any]) -> int:
     return max([len(obj) if iterable(obj) else 1 for obj in objs])
 
 
-def broadcast(objs: list[Any], size: int) -> np.ndarray:
+def broadcast(objs: list[Any], size: int) -> NDArray:
     """
     Broadcast a list of objects.
 
@@ -201,7 +201,7 @@ def broadcast(objs: list[Any], size: int) -> np.ndarray:
 
     Returns
     -------
-    np.ndarray
+    NDArray
         Two dimensional array that stores the squared objects.
 
     """

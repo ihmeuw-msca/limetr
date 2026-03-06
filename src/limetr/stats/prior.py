@@ -2,12 +2,10 @@
 Prior Module
 """
 
-from collections.abc import Iterable
-from numbers import Number
 from typing import Any
 
 import numpy as np
-from numpy.typing import NDArray
+from numpy.typing import ArrayLike, NDArray
 
 from limetr.utils import broadcast, get_maxlen
 
@@ -29,9 +27,9 @@ class Prior:
     """
 
     def __init__(self, info: list[Any] | None = None, size: int = 0):
+        info = [] if info is None else info
         size = max(int(size), get_maxlen(info))
-        info = broadcast(info, size)
-        self.info = info
+        self.info = broadcast(info, size)
         self.size = size
 
     @property
@@ -45,8 +43,6 @@ class Prior:
         """
         return self.size == 0
 
-    # pylint:disable=unused-argument
-    # pylint:disable=no-self-use
     def objective(self, var: NDArray) -> float:
         """
         Objective function for optimization interface.
@@ -124,8 +120,8 @@ class GaussianPrior(Prior):
 
     def __init__(
         self,
-        mean: Number | Iterable = 0.0,
-        sd: Number | Iterable = np.inf,
+        mean: ArrayLike = 0.0,
+        sd: ArrayLike = np.inf,
         size: int = 0,
     ):
         super().__init__([mean, sd], size=size)
@@ -170,8 +166,8 @@ class UniformPrior(Prior):
 
     def __init__(
         self,
-        lb: Number | Iterable = -np.inf,
-        ub: Number | Iterable = np.inf,
+        lb: ArrayLike = -np.inf,
+        ub: ArrayLike = np.inf,
         size: int = 0,
     ):
         super().__init__([lb, ub], size=size)
@@ -199,7 +195,7 @@ class LinearPrior(Prior):
 
     """
 
-    def __init__(self, mat: Iterable, info: list[Any]):
+    def __init__(self, mat: ArrayLike, info: list[Any]):
         mat = np.asarray(mat)
         if mat.ndim != 2:
             raise ValueError("`mat` has to be a matrix.")
@@ -227,9 +223,9 @@ class LinearGaussianPrior(LinearPrior, GaussianPrior):
 
     def __init__(
         self,
-        mat: Iterable,
-        mean: Number | Iterable = 0.0,
-        sd: Number | Iterable = np.inf,
+        mat: ArrayLike,
+        mean: ArrayLike = 0.0,
+        sd: ArrayLike = np.inf,
     ):
         LinearPrior.__init__(self, mat, [mean, sd])
         GaussianPrior.__init__(self, self.info[0], self.info[1], size=self.size)
@@ -267,9 +263,9 @@ class LinearUniformPrior(LinearPrior, UniformPrior):
 
     def __init__(
         self,
-        mat: Iterable,
-        lb: Number | Iterable = -np.inf,
-        ub: Number | Iterable = np.inf,
+        mat: ArrayLike,
+        lb: ArrayLike = -np.inf,
+        ub: ArrayLike = np.inf,
     ):
         LinearPrior.__init__(self, mat, [lb, ub])
         UniformPrior.__init__(self, self.info[0], self.info[1], size=self.size)
