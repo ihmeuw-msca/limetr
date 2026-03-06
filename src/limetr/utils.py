@@ -1,20 +1,22 @@
 """
-    utils
-    ~~~~~
+utils
+~~~~~
 
-    Helper functions.
+Helper functions.
 """
+
 from collections.abc import Iterable
 from numbers import Number
-from typing import Any, List, Union
+from typing import Any
 
 import numpy as np
+from numpy.typing import NDArray
 from spmat.dlmat import BDLMat, DLMat
 
 
-def split_by_sizes(array: np.ndarray,
-                   sizes: List[int],
-                   axis: int = 0) -> List[np.ndarray]:
+def split_by_sizes(
+    array: np.ndarray, sizes: list[int], axis: int = 0
+) -> list[np.ndarray]:
     """
     Function that split an array into a list of arrays, provided the size for
     each sub-array size.
@@ -23,7 +25,7 @@ def split_by_sizes(array: np.ndarray,
     ----------
     array : ndarray
         The array need to be splitted.
-    sizes : List[int]
+    sizes : list[int]
         A list of sizes for each sub-array.
     axis: int, optional
         Along which axis, array will be splitted, default is 0.
@@ -36,35 +38,37 @@ def split_by_sizes(array: np.ndarray,
 
     Returns
     -------
-    List[ndarray]
-        A list of splitted array. 
+    list[ndarray]
+        A list of splitted array.
     """
     assert array.shape[axis] == sum(sizes)
     return np.split(array, np.cumsum(sizes)[:-1], axis=axis)
 
 
-def empty_array() -> np.ndarray:
+def empty_array() -> NDArray[np.floating]:
     """
     Function used for 'default_factory', creates and returns empty array.
 
     Returns
     -------
-    ndarray
+    NDArray[np.floating]
         An empty array with ``dtype`` being ``float``.
     """
     return np.array([])
 
 
-def default_vec_factory(vec: Union[Number, Iterable],
-                        size: int,
-                        default_value: Any = None,
-                        vec_name: str = 'vector') -> np.ndarray:
+def default_vec_factory(
+    vec: Number | Iterable,
+    size: int,
+    default_value: Any = None,
+    vec_name: str = "vector",
+) -> NDArray[np.floating]:
     """
     Function that automatically create and fill values of a vector.
 
     Parameters
     ----------
-    vec : Union[Number, Iterable]
+    vec : Number | Iterable
         A vector or number that need to be checked or expand.
     size : int
         The desired size of the vector.
@@ -84,14 +88,15 @@ def default_vec_factory(vec: Union[Number, Iterable],
 
     Returns
     -------
-    ndarray:
+    NDArray[np.floating]
         Final processed array.
     """
     if np.isscalar(vec):
         vec = np.repeat(vec, size)
     elif len(vec) == 0:
-        assert default_value is not None, \
+        assert default_value is not None, (
             "Must provide `default_value` when `vec` is empty."
+        )
         vec = np.repeat(default_value, size)
     else:
         vec = np.asarray(vec)
@@ -100,7 +105,7 @@ def default_vec_factory(vec: Union[Number, Iterable],
     return vec
 
 
-def check_size(vec: Iterable, size: int, vec_name: str = 'vector'):
+def check_size(vec: Iterable, size: int, vec_name: str = "vector") -> None:
     """
     Function that check the size consistency.
 
@@ -158,7 +163,7 @@ def has_no_repeat(array: np.ndarray) -> bool:
     return array.size == np.unique(array).size
 
 
-def sizes_to_slices(sizes: Iterable) -> List[slice]:
+def sizes_to_slices(sizes: Iterable) -> list[slice]:
     """
     Function that convert sizes of sub-arrays to corresponding slices in the
     original array.
@@ -170,7 +175,7 @@ def sizes_to_slices(sizes: Iterable) -> List[slice]:
 
     Returns
     -------
-    List[slice]
+    list[slice]
         A list of ``slice`` to access each sub-array in the original array.
     """
     ends = np.cumsum(sizes)
@@ -178,13 +183,13 @@ def sizes_to_slices(sizes: Iterable) -> List[slice]:
     return [slice(*pair) for pair in zip(starts, ends)]
 
 
-def get_maxlen(objs: List[Any]) -> int:
+def get_maxlen(objs: list[Any]) -> int:
     """
     Get the maximum len of a list of objects.
 
     Parameters
     ----------
-    objs : List[Any]
+    objs : list[Any]
         A list of objects.
 
     Returns
@@ -195,14 +200,13 @@ def get_maxlen(objs: List[Any]) -> int:
     return max([len(obj) if iterable(obj) else 1 for obj in objs])
 
 
-def broadcast(objs: List[Any],
-              size: int) -> np.ndarray:
+def broadcast(objs: list[Any], size: int) -> np.ndarray:
     """
     Broadcast a list of objects.
 
     Parameters
     ----------
-    objs : List[Any]
+    objs : list[Any]
         A list of objects.
     size : int
         Size for the broadcasting.
@@ -229,7 +233,8 @@ def broadcast(objs: List[Any],
             elif len(obj) == size:
                 objs[i] = np.asarray(obj)
             else:
-                raise ValueError("Object size not consistent with broadcast "
-                                 "size.")
+                raise ValueError(
+                    "Object size not consistent with broadcast size."
+                )
         vecs = np.vstack(objs)
     return vecs

@@ -1,6 +1,8 @@
-from .prior import (Prior,
-                    GaussianPrior,
-                    UniformPrior,
-                    LinearPrior,
-                    LinearGaussianPrior,
-                    LinearUniformPrior)
+from .prior import (
+    Prior,
+    GaussianPrior,
+    UniformPrior,
+    LinearPrior,
+    LinearGaussianPrior,
+    LinearUniformPrior,
+)

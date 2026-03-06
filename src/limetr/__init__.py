@@ -15,23 +15,23 @@ from .stats import (
     UniformPrior,
     LinearPrior,
     LinearGaussianPrior,
-    LinearUniformPrior
+    LinearUniformPrior,
 )
 from .linalg import SmoothMapping, LinearMapping
 
 __all__ = [
     "LimeTr",
-    "Data", 
+    "Data",
     "FeVariable",
     "ReVariable",
     "Variable",
     "funnel",
     "Prior",
     "GaussianPrior",
-    "UniformPrior", 
+    "UniformPrior",
     "LinearPrior",
     "LinearGaussianPrior",
     "LinearUniformPrior",
     "SmoothMapping",
-    "LinearMapping"
+    "LinearMapping",
 ]

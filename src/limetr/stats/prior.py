@@ -1,10 +1,14 @@
 """
 Prior Module
 """
+
+from collections.abc import Iterable
 from numbers import Number
-from typing import Iterable, List, Union, Any
+from typing import Any
 
 import numpy as np
+from numpy.typing import NDArray
+
 from limetr.utils import broadcast, get_maxlen
 
 
@@ -29,13 +33,11 @@ class Prior:
         Hessian function of the optimization interface
     """
 
-    def __init__(self,
-                 info: List[Any] = None,
-                 size: int = 0):
+    def __init__(self, info: list[Any] | None = None, size: int = 0):
         """
         Parameters
         ----------
-        info : List[Any]
+        info : list[Any] | None
             Information of the prior. Length of the list is number of
             information components. Each component can be either scalar or a
             vector. If there are more than one vector with size more than one,
@@ -60,13 +62,13 @@ class Prior:
 
     # pylint:disable=unused-argument
     # pylint:disable=no-self-use
-    def objective(self, var: np.ndarray) -> float:
+    def objective(self, var: NDArray[np.floating]) -> float:
         """
-        Objective function for optimiation interface.
+        Objective function for optimization interface.
 
         Parameters
         ----------
-        var : np.ndarray
+        var : NDArray[np.floating]
             Variable that prior is acting on.
 
         Returns
@@ -76,34 +78,34 @@ class Prior:
         """
         return 0.0
 
-    def gradient(self, var: np.ndarray) -> np.ndarray:
+    def gradient(self, var: NDArray[np.floating]) -> NDArray[np.floating]:
         """
-        Gradient function for optimiation interface.
+        Gradient function for optimization interface.
 
         Parameters
         ----------
-        var : ndarray
+        var : NDArray[np.floating]
             Variable that prior is acting on.
 
         Returns
         -------
-        ndarray
+        NDArray[np.floating]
             Gradient value regarding the log likelihood of the prior.
         """
         return np.zeros(len(var))
 
-    def hessian(self, var: np.ndarray) -> np.ndarray:
+    def hessian(self, var: NDArray[np.floating]) -> NDArray[np.floating]:
         """
-        Hessian function for optimiation interface.
+        Hessian function for optimization interface.
 
         Parameters
         ----------
-        var : ndarray
+        var : NDArray[np.floating]
             Variable that prior is acting on.
 
         Returns
         -------
-        ndarray
+        NDArray[np.floating]
             Hessian value regarding the log likelihood of the prior.
         """
         return np.zeros((len(var), len(var)))
@@ -124,16 +126,18 @@ class GaussianPrior(Prior):
             Standard deviation vector of the prior.
     """
 
-    def __init__(self,
-                 mean: Union[Number, Iterable] = 0.0,
-                 sd: Union[Number, Iterable] = np.inf,
-                 size: int = 0):
+    def __init__(
+        self,
+        mean: Number | Iterable = 0.0,
+        sd: Number | Iterable = np.inf,
+        size: int = 0,
+    ):
         """
         Parameters
         ----------
-        mean : Union[Number, Iterable], optional
+        mean : Number | Iterable, optional
             Mean of the Gaussian prior, by default 0.
-        sd : Union[Number, Iterable], optional
+        sd : Number | Iterable, optional
             Standard deviation of the Gaussian prior, by default inf.
         size : int, optional
             Size of the prior, by default 0.
@@ -149,15 +153,15 @@ class GaussianPrior(Prior):
         self.mean = self.info[0]
         self.sd = self.info[1]
 
-    def objective(self, var: np.ndarray) -> float:
-        return 0.5*np.sum((var - self.mean)**2/self.sd**2)
+    def objective(self, var: NDArray[np.floating]) -> float:
+        return 0.5 * np.sum((var - self.mean) ** 2 / self.sd**2)
 
-    def gradient(self, var: np.ndarray) -> np.ndarray:
-        return (var - self.mean)/self.sd**2
+    def gradient(self, var: NDArray[np.floating]) -> NDArray[np.floating]:
+        return (var - self.mean) / self.sd**2
 
     # pylint: disable=unused-argument
-    def hessian(self, var: np.ndarray) -> np.ndarray:
-        return np.diag(1/self.sd**2)
+    def hessian(self, var: NDArray[np.floating]) -> NDArray[np.floating]:
+        return np.diag(1 / self.sd**2)
 
     def __repr__(self) -> str:
         return f"GaussianPrior(mean={self.mean}, sd={self.sd})"
@@ -175,16 +179,18 @@ class UniformPrior(Prior):
             Upper bounds of the prior.
     """
 
-    def __init__(self,
-                 lb: Union[Number, Iterable] = -np.inf,
-                 ub: Union[Number, Iterable] = np.inf,
-                 size: int = 0):
+    def __init__(
+        self,
+        lb: Number | Iterable = -np.inf,
+        ub: Number | Iterable = np.inf,
+        size: int = 0,
+    ):
         """
         Parameters
         ----------
-        lb : Union[Number, Iterable], optional
+        lb : Number | Iterable, optional
             Lower bounds of the prior, by default -inf
-        ub : Union[Number, Iterable], optional
+        ub : Number | Iterable, optional
             Upper bounds of the prior, by default inf
         size : int, optional
             Size of the prior, by default 0
@@ -196,7 +202,9 @@ class UniformPrior(Prior):
         """
         super().__init__([lb, ub], size=size)
         if any(self.info[0] > self.info[1]):
-            raise ValueError("Lower bounds must be less or equal than upper bounds.")
+            raise ValueError(
+                "Lower bounds must be less or equal than upper bounds."
+            )
         self.lb = self.info[0]
         self.ub = self.info[1]
 
@@ -214,15 +222,13 @@ class LinearPrior(Prior):
         Linear mapping (matrix).
     """
 
-    def __init__(self,
-                 mat: Iterable,
-                 info: List[Any]):
+    def __init__(self, mat: Iterable, info: list[Any]):
         """
         Parameters
         ----------
         mat : Iterable
             Linear mapping (matrix).
-        info : List[Any]
+        info : list[Any]
             Information array of the prior.
         """
         mat = np.asarray(mat)
@@ -240,32 +246,34 @@ class LinearGaussianPrior(LinearPrior, GaussianPrior):
     Linear Gaussian Prior
     """
 
-    def __init__(self,
-                 mat: Iterable,
-                 mean: Union[Number, Iterable] = 0.0,
-                 sd: Union[Number, Iterable] = np.inf):
+    def __init__(
+        self,
+        mat: Iterable,
+        mean: Number | Iterable = 0.0,
+        sd: Number | Iterable = np.inf,
+    ):
         """
         Parameters
         ----------
-        mat: Iterable
+        mat : Iterable
             Linear mapping(matrix).
-        mean: Union[Number, Iterable], optional
-            Mean of the prior, by default tuple with zero length.
-        sd: Union[Number, Iterable], optional
-            Standard deviation of the prior, by default tuple with zero length.
+        mean : Number | Iterable, optional
+            Mean of the prior, by default 0.0.
+        sd : Number | Iterable, optional
+            Standard deviation of the prior, by default inf.
         """
         LinearPrior.__init__(self, mat, [mean, sd])
         GaussianPrior.__init__(self, self.info[0], self.info[1], size=self.size)
 
-    def objective(self, var: np.ndarray) -> float:
+    def objective(self, var: NDArray[np.floating]) -> float:
         trans_var = self.mat.dot(var)
         return super().objective(trans_var)
 
-    def gradient(self, var: np.ndarray) -> np.ndarray:
+    def gradient(self, var: NDArray[np.floating]) -> NDArray[np.floating]:
         trans_var = self.mat.dot(var)
         return self.mat.T.dot(super().gradient(trans_var))
 
-    def hessian(self, var: np.ndarray) -> np.ndarray:
+    def hessian(self, var: NDArray[np.floating]) -> NDArray[np.floating]:
         trans_var = self.mat.dot(var)
         return self.mat.T.dot(super().hessian(trans_var).dot(self.mat))
 
@@ -278,19 +286,21 @@ class LinearUniformPrior(LinearPrior, UniformPrior):
     Linear Uniform Prior
     """
 
-    def __init__(self,
-                 mat: Iterable,
-                 lb: Union[Number, Iterable] = -np.inf,
-                 ub: Union[Number, Iterable] = np.inf):
+    def __init__(
+        self,
+        mat: Iterable,
+        lb: Number | Iterable = -np.inf,
+        ub: Number | Iterable = np.inf,
+    ):
         """
         Parameters
         ----------
-        mat: Iterable
+        mat : Iterable
             Linear mapping(matrix).
-        lb: Union[Number, Iterable], optional
-            Lower bounds of the prior, by default tuple with zero length.
-        ub: Union[Number, Iterable], optional
-            Upper bounds of the prior, by default tuple with zero length.
+        lb : Number | Iterable, optional
+            Lower bounds of the prior, by default -inf.
+        ub : Number | Iterable, optional
+            Upper bounds of the prior, by default inf.
         """
         LinearPrior.__init__(self, mat, [lb, ub])
         UniformPrior.__init__(self, self.info[0], self.info[1], size=self.size)

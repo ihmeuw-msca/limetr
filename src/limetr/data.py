@@ -1,14 +1,16 @@
 """
-    data
-    ~~~~
+data
+~~~~
 
-    Data module.
+Data module.
 """
+
 import operator
+from collections.abc import Iterable
 from numbers import Number
-from typing import Iterable, Union
 
 import numpy as np
+from numpy.typing import NDArray
 
 from limetr.utils import default_vec_factory, iterable
 
@@ -20,32 +22,34 @@ class Data:
 
     Attributes
     ----------
-    obs : Vector
+    obs : NDArray[np.floating]
         Observations. Assumed to be sorted by the group id.
-    obs_se : Vector
+    obs_se : NDArray[np.floating]
         Standard deviations of observation. Default is one for each observation.
-    group_sizes : Vector
+    group_sizes : NDArray[np.integer]
         Number of observations for each group. Default treat every observation
         as a group by itself.
-    weight : Vector
+    weight : NDArray[np.floating]
         Weights for each observation. Default is one for each observation.
     """
 
-    def __init__(self,
-                 obs: Iterable,
-                 obs_se: Union[Number, Iterable] = 1.0,
-                 group_sizes: Iterable[int] = None,
-                 weight: Union[Number, Iterable] = 1.0):
+    def __init__(
+        self,
+        obs: Iterable,
+        obs_se: Number | Iterable = 1.0,
+        group_sizes: Iterable[int] | None = None,
+        weight: Number | Iterable = 1.0,
+    ) -> None:
         """
         Parameters
         ----------
         obs : Iterable
             Observations. Assumed to be sorted by the group id.
-        obs_se : Union[Number, Iterable], optional
+        obs_se : Number | Iterable, optional
             Standard deviations of observation. Default is one.
-        group_sizes : Iterable[int], optional
+        group_sizes : Iterable[int] | None, optional
             Number of observations for each group. Default is ``None``.
-        weight : Union[Number, Iterable], optional
+        weight : Number | Iterable, optional
             Weights for each observation. Default is one.
         """
         self.obs = obs
@@ -66,7 +70,7 @@ class Data:
     obs = property(operator.attrgetter("_obs"))
 
     @obs.setter
-    def obs(self, vec: Iterable):
+    def obs(self, vec: Iterable) -> None:
         vec = np.asarray(vec)
         if any(np.isnan(vec)):
             raise ValueError("`obs` must not containing nan(s).")
@@ -75,7 +79,7 @@ class Data:
     obs_se = property(operator.attrgetter("_obs_se"))
 
     @obs_se.setter
-    def obs_se(self, vec: Union[Number, Iterable]):
+    def obs_se(self, vec: Number | Iterable) -> None:
         vec = default_vec_factory(vec, self.num_obs, vec_name="obs_se")
         if any(vec <= 0.0):
             raise ValueError("`obs_se` must be all positive.")
@@ -84,7 +88,7 @@ class Data:
     weight = property(operator.attrgetter("_weight"))
 
     @weight.setter
-    def weight(self, vec: Union[Number, Iterable]):
+    def weight(self, vec: Number | Iterable) -> None:
         vec = default_vec_factory(vec, self.num_obs, vec_name="weight")
         if any(vec < 0) or any(vec > 1):
             raise ValueError("`weight` must be all between 0 and 1.")
@@ -93,7 +97,7 @@ class Data:
     group_sizes = property(operator.attrgetter("_group_sizes"))
 
     @group_sizes.setter
-    def group_sizes(self, vec: Union[None, Iterable]):
+    def group_sizes(self, vec: Iterable | None) -> None:
         if vec is None:
             vec = np.ones(self.num_obs, dtype=int)
         elif iterable(vec):

@@ -4,7 +4,7 @@ import pytest
 import limetr.linalg as linalg
 
 
-#pylint: disable=redefined-outer-name
+# pylint: disable=redefined-outer-name
 
 
 @pytest.fixture
@@ -18,7 +18,7 @@ def smooth_mapping():
         return np.exp(mat1.dot(x)) - np.exp(mat2.dot(x))
 
     def jac(x):
-        return (mat1.T*np.exp(mat1.dot(x)) - mat2.T*np.exp(mat2.dot(x))).T
+        return (mat1.T * np.exp(mat1.dot(x)) - mat2.T * np.exp(mat2.dot(x))).T
 
     return linalg.SmoothMapping((m, n), fun, jac)
 

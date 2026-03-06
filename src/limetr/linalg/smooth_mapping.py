@@ -1,12 +1,14 @@
 """
-    smooth_mapping
-    ~~~~~~~~~~~~~~
+smooth_mapping
+~~~~~~~~~~~~~~
 
-    Smooth mapping module.
+Smooth mapping module.
 """
-from typing import Callable, Tuple
+
+from collections.abc import Callable
 
 import numpy as np
+from numpy.typing import NDArray
 
 
 class SmoothMapping:
@@ -15,7 +17,7 @@ class SmoothMapping:
 
     Attributes
     ----------
-    shape: Tuple[int, int]
+    shape: tuple[int, int]
         Shape of the mapping.
     fun: Callable
         Mapping function.
@@ -23,14 +25,16 @@ class SmoothMapping:
         Jacobian function of the mapping.
     """
 
-    def __init__(self,
-                 shape: Tuple[int, int],
-                 fun: Callable,
-                 jac: Callable):
+    def __init__(
+        self,
+        shape: tuple[int, int],
+        fun: Callable,
+        jac: Callable,
+    ):
         """
         Parameters
         ----------
-        shape : Tuple[int, int]
+        shape : tuple[int, int]
             Shape of the mapping.
         fun : Callable
             Mapping function.
@@ -46,10 +50,11 @@ class SmoothMapping:
         AssertionError
             If ``jac`` is not callable.
         """
-        assert (isinstance(shape, tuple) and
-                len(shape) == 2 and
-                all([isinstance(size, int) and size > 0 for size in shape])), \
-            "`shape` has to be tuple with two positive integers."
+        assert (
+            isinstance(shape, tuple)
+            and len(shape) == 2
+            and all([isinstance(size, int) and size > 0 for size in shape])
+        ), "`shape` has to be tuple with two positive integers."
         assert callable(fun), "`fun` must be callable."
         assert callable(jac), "`jac` must be callable."
         self.shape = shape
@@ -70,14 +75,16 @@ class SmoothMapping:
         Callable
             Function that valide the input.
         """
-        def decorated_fun(x: np.ndarray) -> np.ndarray:
+
+        def decorated_fun(x: NDArray[np.floating]) -> NDArray[np.floating]:
             x = np.asarray(x)
             if x.size != self.shape[1]:
                 raise ValueError("Input size not matching with mapping shape.")
             return fun(x)
+
         return decorated_fun
 
-    def __call__(self, x: np.ndarray) -> np.ndarray:
+    def __call__(self, x: NDArray[np.floating]) -> NDArray[np.floating]:
         return self.fun(x)
 
     def __repr__(self) -> str:
@@ -95,11 +102,11 @@ class LinearMapping(SmoothMapping):
         Matrix as the linear mapping.
     """
 
-    def __init__(self, mat: np.ndarray):
+    def __init__(self, mat: NDArray[np.floating]):
         """
         Parameters
         ----------
-        mat : ndarray
+        mat : NDArray[np.floating]
             Matrix as the linear mapping.
         """
         mat = np.asarray(mat)
@@ -107,8 +114,11 @@ class LinearMapping(SmoothMapping):
         self.mat = mat
 
         # pylint: disable=unused-argument
-        def fun(x): return mat.dot(x)
-        def jac(x): return mat
+        def fun(x):
+            return mat.dot(x)
+
+        def jac(x):
+            return mat
 
         super().__init__(mat.shape, fun, jac)
 

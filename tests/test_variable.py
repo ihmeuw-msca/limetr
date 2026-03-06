@@ -1,10 +1,16 @@
 """
 Test Variable Module
 """
+
 import pytest
 import numpy as np
 from limetr.linalg import LinearMapping
-from limetr.stats import GaussianPrior, UniformPrior, LinearGaussianPrior, LinearUniformPrior
+from limetr.stats import (
+    GaussianPrior,
+    UniformPrior,
+    LinearGaussianPrior,
+    LinearUniformPrior,
+)
 from limetr.variable import Variable, FeVariable, ReVariable
 
 
@@ -122,7 +128,7 @@ def test_var_prior_hessian(var, gprior, linear_gprior, x):
 
 def test_var_get_uprior_info(var, uprior):
     my_val = var.get_uprior_info()
-    assert np.allclose(my_val, np.array([[-np.inf]*2, [np.inf]*2]))
+    assert np.allclose(my_val, np.array([[-np.inf] * 2, [np.inf] * 2]))
     var.update_priors([uprior])
     my_val = var.get_uprior_info()
     assert np.allclose(my_val, uprior.info)

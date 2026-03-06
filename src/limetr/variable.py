@@ -1,14 +1,22 @@
 """
 Variable Module
 """
-from typing import Any, Iterable, Type
+
+from collections.abc import Iterable
+from typing import Any
 
 import numpy as np
-from numpy import ndarray
+from numpy.typing import NDArray
 
 from limetr.linalg import LinearMapping, SmoothMapping
-from limetr.stats import (GaussianPrior, LinearGaussianPrior, LinearPrior,
-                          LinearUniformPrior, Prior, UniformPrior)
+from limetr.stats import (
+    GaussianPrior,
+    LinearGaussianPrior,
+    LinearPrior,
+    LinearUniformPrior,
+    Prior,
+    UniformPrior,
+)
 
 
 class Variable:
@@ -27,9 +35,9 @@ class Variable:
         Gaussian prior of the variable.
     uprior : UniformPrior
         Uniform prior of the variable.
-    linear_gpriors : List[LinearGaussianPrior]
+    linear_gpriors : list[LinearGaussianPrior]
         List of linear Gaussian priors.
-    linear_upriors : List[LinearUniformPrior]
+    linear_upriors : list[LinearUniformPrior]
         List of linear Uniform priors.
 
     Methods
@@ -60,10 +68,12 @@ class Variable:
         Return linear Uniform upper and lower bounds.
     """
 
-    def __init__(self,
-                 mapping: SmoothMapping,
-                 priors: Iterable[Prior] = (),
-                 name: Any = "unknown"):
+    def __init__(
+        self,
+        mapping: SmoothMapping,
+        priors: Iterable[Prior] = (),
+        name: Any = "unknown",
+    ) -> None:
         """
         Parameters
         ----------
@@ -86,8 +96,8 @@ class Variable:
 
         self.gprior = GaussianPrior(size=self.size)
         self.uprior = UniformPrior(size=self.size)
-        self.linear_gpriors = []
-        self.linear_upriors = []
+        self.linear_gpriors: list[LinearGaussianPrior] = []
+        self.linear_upriors: list[LinearUniformPrior] = []
         self.update_priors(priors)
 
     @property
@@ -95,19 +105,24 @@ class Variable:
         """Size of the variable"""
         return self.mapping.shape[1]
 
-    def _validate_prior(self,
-                        prior: Prior,
-                        prior_type: Type) -> Prior:
+    def _validate_prior(
+        self,
+        prior: Prior,
+        prior_type: type[Prior],
+    ) -> Prior:
         if not isinstance(prior, prior_type):
             raise TypeError(f"`prior` must be type {prior_type.__name__}.")
-        size_matching = prior.mat.shape[1] == self.size \
-            if issubclass(prior_type, LinearPrior) else prior.size == self.size
+        size_matching = (
+            prior.mat.shape[1] == self.size
+            if issubclass(prior_type, LinearPrior)
+            else prior.size == self.size
+        )
         if not size_matching:
             raise ValueError("`prior` size not match with variable.")
 
         return prior
 
-    def update_gprior(self, prior: GaussianPrior):
+    def update_gprior(self, prior: GaussianPrior) -> None:
         """
         Update Gaussian prior.
 
@@ -117,7 +132,7 @@ class Variable:
         """
         self.gprior = self._validate_prior(prior, GaussianPrior)
 
-    def update_uprior(self, prior: UniformPrior):
+    def update_uprior(self, prior: UniformPrior) -> None:
         """
         Update Uniform prior
 
@@ -127,7 +142,7 @@ class Variable:
         """
         self.uprior = self._validate_prior(prior, UniformPrior)
 
-    def update_linear_gpriors(self, prior: LinearGaussianPrior):
+    def update_linear_gpriors(self, prior: LinearGaussianPrior) -> None:
         """
         Update linear Gaussian priors
 
@@ -135,11 +150,11 @@ class Variable:
         ----------
         prior : LinearGaussianPrior
         """
-        self.linear_gpriors.append(self._validate_prior(
-            prior, LinearGaussianPrior
-        ))
+        self.linear_gpriors.append(
+            self._validate_prior(prior, LinearGaussianPrior)
+        )
 
-    def update_linear_upriors(self, prior: LinearUniformPrior):
+    def update_linear_upriors(self, prior: LinearUniformPrior) -> None:
         """
         Update linear Uniform priors
 
@@ -147,11 +162,11 @@ class Variable:
         ----------
         prior : LinearUniformPrior
         """
-        self.linear_upriors.append(self._validate_prior(
-            prior, LinearUniformPrior
-        ))
+        self.linear_upriors.append(
+            self._validate_prior(prior, LinearUniformPrior)
+        )
 
-    def update_priors(self, priors: Iterable[Prior]):
+    def update_priors(self, priors: Iterable[Prior]) -> None:
         """
         Update priors
 
@@ -174,9 +189,11 @@ class Variable:
             elif isinstance(prior, UniformPrior):
                 self.update_uprior(prior)
             else:
-                raise TypeError(f"Unrecognize prior type {type(prior).__name__}")
+                raise TypeError(
+                    f"Unrecognize prior type {type(prior).__name__}"
+                )
 
-    def reset_priors(self):
+    def reset_priors(self) -> None:
         """
         Reset prior to default settings
         """
@@ -185,13 +202,13 @@ class Variable:
         self.linear_gpriors = []
         self.linear_upriors = []
 
-    def prior_objective(self, var: ndarray) -> float:
+    def prior_objective(self, var: NDArray[np.floating]) -> float:
         """
         Objective function from Gaussian prior and linear Gaussian priors.
 
         Parameters
         ----------
-        var : ndarray
+        var : NDArray[np.floating]
             Variables.
 
         Returns
@@ -204,18 +221,18 @@ class Variable:
             val += prior.objective(var)
         return val
 
-    def prior_gradient(self, var: ndarray) -> ndarray:
+    def prior_gradient(self, var: NDArray[np.floating]) -> NDArray[np.floating]:
         """
         Gradient function from Gaussian prior and linear Gaussian priors.
 
         Parameters
         ----------
-        var : ndarray
+        var : NDArray[np.floating]
             Variables.
 
         Returns
         -------
-        ndarray
+        NDArray[np.floating]
             Gradient at given value.
         """
         val = self.gprior.gradient(var)
@@ -223,18 +240,18 @@ class Variable:
             val += prior.gradient(var)
         return val
 
-    def prior_hessian(self, var: ndarray) -> ndarray:
+    def prior_hessian(self, var: NDArray[np.floating]) -> NDArray[np.floating]:
         """
         Hessian function from Gaussian prior and linear Gaussian priors.
 
         Parameters
         ----------
-        var : ndarray
+        var : NDArray[np.floating]
             Variables.
 
         Returns
         -------
-        ndarray
+        NDArray[np.floating]
             Hessian at given value.
         """
         val = self.gprior.hessian(var)
@@ -242,13 +259,13 @@ class Variable:
             val += prior.hessian(var)
         return val
 
-    def get_uprior_info(self) -> ndarray:
+    def get_uprior_info(self) -> NDArray[np.floating]:
         """
         Get Uniform prior information
 
         Returns
         -------
-        ndarray
+        NDArray[np.floating]
             Lower and upper bounds of the prior.
         """
         if self.uprior is None:
@@ -257,13 +274,13 @@ class Variable:
             uprior = self.uprior
         return uprior.info
 
-    def get_linear_upriors_mat(self) -> ndarray:
+    def get_linear_upriors_mat(self) -> NDArray[np.floating]:
         """
         Get linear Uniform prior linear mapping
 
         Returns
         -------
-        ndarray
+        NDArray[np.floating]
             Linear mapping of the prior.
         """
         if len(self.linear_upriors) == 0:
@@ -272,13 +289,13 @@ class Variable:
             mat = np.vstack([prior.mat for prior in self.linear_upriors])
         return mat
 
-    def get_linear_upriors_info(self) -> ndarray:
+    def get_linear_upriors_info(self) -> NDArray[np.floating]:
         """
-        Get linear Unform prior information
+        Get linear Uniform prior information
 
         Returns
         -------
-        ndarray
+        NDArray[np.floating]
             Lower and upper bounds of the prior.
         """
         if len(self.linear_upriors) == 0:
@@ -296,10 +313,12 @@ class FeVariable(Variable):
     Fixed effects variable.
     """
 
-    def __init__(self,
-                 mapping: SmoothMapping,
-                 priors: Iterable[Prior] = (),
-                 name: Any = "fixed effects"):
+    def __init__(
+        self,
+        mapping: SmoothMapping,
+        priors: Iterable[Prior] = (),
+        name: Any = "fixed effects",
+    ) -> None:
         """
         Parameters
         ----------
@@ -317,10 +336,12 @@ class ReVariable(Variable):
     Random effects variable.
     """
 
-    def __init__(self,
-                 mapping: SmoothMapping,
-                 priors: Iterable[Prior] = (),
-                 name: Any = "random effects"):
+    def __init__(
+        self,
+        mapping: SmoothMapping,
+        priors: Iterable[Prior] = (),
+        name: Any = "random effects",
+    ) -> None:
         """
         Parameters
         ----------
@@ -331,18 +352,22 @@ class ReVariable(Variable):
             raise TypeError("Random effect design mapping has to be linear.")
 
         priors = list(priors)
-        if not any([isinstance(prior, UniformPrior) for prior in priors]):
-            priors.append(UniformPrior(lb=0.0, ub=np.inf, size=mapping.mat.shape[1]))
+        if not any(isinstance(prior, UniformPrior) for prior in priors):
+            priors.append(
+                UniformPrior(lb=0.0, ub=np.inf, size=mapping.mat.shape[1])
+            )
 
         super().__init__(mapping, priors, name=name)
 
-    def update_uprior(self, prior: UniformPrior):
+    def update_uprior(self, prior: UniformPrior) -> None:
         prior = self._validate_prior(prior, UniformPrior)
         if any(prior.lb < 0):
-            raise ValueError("Random effects variance must have non-negative lower bounds.")
+            raise ValueError(
+                "Random effects variance must have non-negative lower bounds."
+            )
         self.uprior = prior
 
-    def reset_priors(self):
+    def reset_priors(self) -> None:
         self.gprior = GaussianPrior(size=self.size)
         self.uprior = UniformPrior(lb=0.0, ub=np.inf, size=self.size)
         self.linear_gpriors = []
