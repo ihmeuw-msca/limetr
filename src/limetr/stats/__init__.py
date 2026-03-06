@@ -1,8 +1,17 @@
 from .prior import (
-    Prior,
     GaussianPrior,
-    UniformPrior,
-    LinearPrior,
     LinearGaussianPrior,
+    LinearPrior,
     LinearUniformPrior,
+    Prior,
+    UniformPrior,
 )
+
+__all__ = [
+    "GaussianPrior",
+    "LinearGaussianPrior",
+    "LinearPrior",
+    "LinearUniformPrior",
+    "Prior",
+    "UniformPrior",
+]

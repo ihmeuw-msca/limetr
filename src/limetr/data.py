@@ -10,7 +10,6 @@ from collections.abc import Iterable
 from numbers import Number
 
 import numpy as np
-from numpy.typing import NDArray
 
 from limetr.utils import default_vec_factory, iterable
 

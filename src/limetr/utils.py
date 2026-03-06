@@ -11,7 +11,6 @@ from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
-from spmat.dlmat import BDLMat, DLMat
 
 
 def split_by_sizes(
