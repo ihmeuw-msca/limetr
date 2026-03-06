@@ -62,13 +62,13 @@ class Prior:
 
     # pylint:disable=unused-argument
     # pylint:disable=no-self-use
-    def objective(self, var: NDArray[np.floating]) -> float:
+    def objective(self, var: NDArray) -> float:
         """
         Objective function for optimization interface.
 
         Parameters
         ----------
-        var : NDArray[np.floating]
+        var : NDArray
             Variable that prior is acting on.
 
         Returns
@@ -78,34 +78,34 @@ class Prior:
         """
         return 0.0
 
-    def gradient(self, var: NDArray[np.floating]) -> NDArray[np.floating]:
+    def gradient(self, var: NDArray) -> NDArray:
         """
         Gradient function for optimization interface.
 
         Parameters
         ----------
-        var : NDArray[np.floating]
+        var : NDArray
             Variable that prior is acting on.
 
         Returns
         -------
-        NDArray[np.floating]
+        NDArray
             Gradient value regarding the log likelihood of the prior.
         """
         return np.zeros(len(var))
 
-    def hessian(self, var: NDArray[np.floating]) -> NDArray[np.floating]:
+    def hessian(self, var: NDArray) -> NDArray:
         """
         Hessian function for optimization interface.
 
         Parameters
         ----------
-        var : NDArray[np.floating]
+        var : NDArray
             Variable that prior is acting on.
 
         Returns
         -------
-        NDArray[np.floating]
+        NDArray
             Hessian value regarding the log likelihood of the prior.
         """
         return np.zeros((len(var), len(var)))
@@ -153,14 +153,14 @@ class GaussianPrior(Prior):
         self.mean = self.info[0]
         self.sd = self.info[1]
 
-    def objective(self, var: NDArray[np.floating]) -> float:
+    def objective(self, var: NDArray) -> float:
         return 0.5 * np.sum((var - self.mean) ** 2 / self.sd**2)
 
-    def gradient(self, var: NDArray[np.floating]) -> NDArray[np.floating]:
+    def gradient(self, var: NDArray) -> NDArray:
         return (var - self.mean) / self.sd**2
 
     # pylint: disable=unused-argument
-    def hessian(self, var: NDArray[np.floating]) -> NDArray[np.floating]:
+    def hessian(self, var: NDArray) -> NDArray:
         return np.diag(1 / self.sd**2)
 
     def __repr__(self) -> str:
@@ -265,15 +265,15 @@ class LinearGaussianPrior(LinearPrior, GaussianPrior):
         LinearPrior.__init__(self, mat, [mean, sd])
         GaussianPrior.__init__(self, self.info[0], self.info[1], size=self.size)
 
-    def objective(self, var: NDArray[np.floating]) -> float:
+    def objective(self, var: NDArray) -> float:
         trans_var = self.mat.dot(var)
         return super().objective(trans_var)
 
-    def gradient(self, var: NDArray[np.floating]) -> NDArray[np.floating]:
+    def gradient(self, var: NDArray) -> NDArray:
         trans_var = self.mat.dot(var)
         return self.mat.T.dot(super().gradient(trans_var))
 
-    def hessian(self, var: NDArray[np.floating]) -> NDArray[np.floating]:
+    def hessian(self, var: NDArray) -> NDArray:
         trans_var = self.mat.dot(var)
         return self.mat.T.dot(super().hessian(trans_var).dot(self.mat))
 

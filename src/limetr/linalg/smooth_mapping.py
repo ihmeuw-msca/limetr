@@ -76,7 +76,7 @@ class SmoothMapping:
             Function that valide the input.
         """
 
-        def decorated_fun(x: NDArray[np.floating]) -> NDArray[np.floating]:
+        def decorated_fun(x: NDArray) -> NDArray:
             x = np.asarray(x)
             if x.size != self.shape[1]:
                 raise ValueError("Input size not matching with mapping shape.")
@@ -84,14 +84,13 @@ class SmoothMapping:
 
         return decorated_fun
 
-    def __call__(self, x: NDArray[np.floating]) -> NDArray[np.floating]:
+    def __call__(self, x: NDArray) -> NDArray:
         return self.fun(x)
 
     def __repr__(self) -> str:
         return f"SmoothMapping(shape={self.shape})"
 
 
-# pylint:disable=too-few-public-methods
 class LinearMapping(SmoothMapping):
     """
     Linear mapping class, construct smooth mapping from a matrix.
@@ -102,11 +101,11 @@ class LinearMapping(SmoothMapping):
         Matrix as the linear mapping.
     """
 
-    def __init__(self, mat: NDArray[np.floating]):
+    def __init__(self, mat: NDArray):
         """
         Parameters
         ----------
-        mat : NDArray[np.floating]
+        mat : NDArray
             Matrix as the linear mapping.
         """
         mat = np.asarray(mat)

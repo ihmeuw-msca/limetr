@@ -106,19 +106,17 @@ class LimeTr:
         self.result = None
 
     # pylint:disable=unbalanced-tuple-unpacking
-    def get_vars(
-        self, var: NDArray[np.floating]
-    ) -> tuple[NDArray[np.floating], NDArray[np.floating]]:
+    def get_vars(self, var: NDArray) -> tuple[NDArray, NDArray]:
         """
         Split array into variables beta and gamma.
 
         Parameters
         ----------
-        var : NDArray[np.floating]
+        var : NDArray
 
         Returns
         -------
-        tuple[NDArray[np.floating], NDArray[np.floating]]
+        tuple[NDArray, NDArray]
             Return beta and gamma.
         """
         beta, gamma = tuple(
@@ -127,65 +125,65 @@ class LimeTr:
         gamma[gamma < 0] = 0.0
         return beta, gamma
 
-    def get_residual(self, beta: NDArray[np.floating]) -> NDArray[np.floating]:
+    def get_residual(self, beta: NDArray) -> NDArray:
         """
         Compute trimming weighted residual
 
         Parameters
         ----------
-        beta : NDArray[np.floating]
+        beta : NDArray
 
         Returns
         -------
-        NDArray[np.floating]
+        NDArray
             Weighted residual
         """
         return self.data.weight * (self.data.obs - self.fevar.mapping(beta))
 
-    def get_femat(self, beta: NDArray[np.floating]) -> NDArray[np.floating]:
+    def get_femat(self, beta: NDArray) -> NDArray:
         """
         Compute trimming weighted Jacobian matrix of fixed effects.
 
         Parameters
         ----------
-        beta : NDArray[np.floating]
+        beta : NDArray
 
         Returns
         -------
-        NDArray[np.floating]
+        NDArray
             Weighted Jacobian matrix of fixed effects.
         """
         return self.data.weight[:, None] * self.fevar.mapping.jac(beta)
 
-    def get_remat(self) -> NDArray[np.floating]:
+    def get_remat(self) -> NDArray:
         """
         Compute trimming weighted design matrix of random effects.
 
         Returns
         -------
-        NDArray[np.floating]
+        NDArray
             Weighted design matrix of random effects.
         """
         return self.data.weight[:, None] * self.revar.mapping.mat
 
-    def get_obsvar(self) -> NDArray[np.floating]:
+    def get_obsvar(self) -> NDArray:
         """
         Compute trimming weighted observation variance
 
         Returns
         -------
-        NDArray[np.floating]
+        NDArray
             Weighted observation variance
         """
         return self.data.obs_se ** (2 * self.data.weight)
 
-    def get_varmat(self, gamma: NDArray[np.floating]) -> BDLMat:
+    def get_varmat(self, gamma: NDArray) -> BDLMat:
         """
         Compute trimming weighted variance covariance matrix of the likelihood
 
         Parameters
         ----------
-        gamma : NDArray[np.floating]
+        gamma : NDArray
 
         Returns
         -------
@@ -198,13 +196,13 @@ class LimeTr:
             self.data.group_sizes,
         )
 
-    def objective(self, var: NDArray[np.floating]) -> float:
+    def objective(self, var: NDArray) -> float:
         """
         Objective function of the optimization problem.
 
         Parameters
         ----------
-        var : NDArray[np.floating]
+        var : NDArray
 
         Returns
         -------
@@ -221,17 +219,17 @@ class LimeTr:
 
         return val
 
-    def gradient(self, var: NDArray[np.floating]) -> NDArray[np.floating]:
+    def gradient(self, var: NDArray) -> NDArray:
         """
         Gradient function of the optimization problem
 
         Parameters
         ----------
-        var : NDArray[np.floating]
+        var : NDArray
 
         Returns
         -------
-        NDArray[np.floating]
+        NDArray
             Gradient at given variable.
         """
         beta, gamma = self.get_vars(var)
@@ -253,18 +251,18 @@ class LimeTr:
 
         return np.hstack([grad_beta, grad_gamma])
 
-    def hessian(self, var: NDArray[np.floating]) -> NDArray[np.floating]:
+    def hessian(self, var: NDArray) -> NDArray:
         """
         Hessian function of the optimization problem, approximated by the Fisher
         information matrix.
 
         Parameters
         ----------
-        var : NDArray[np.floating]
+        var : NDArray
 
         Returns
         -------
-        NDArray[np.floating]
+        NDArray
             Hessian at given variable.
         """
         beta, gamma = self.get_vars(var)
@@ -288,17 +286,17 @@ class LimeTr:
 
         return block_diag(beta_fisher, gamma_fisher)
 
-    def detect_outliers(self, var: NDArray[np.floating]) -> NDArray[np.bool_]:
+    def detect_outliers(self, var: NDArray) -> NDArray:
         """
         Detect outlier based on the statistical model and given variable
 
         Parameters
         ----------
-        var : NDArray[np.floating]
+        var : NDArray
 
         Returns
         -------
-        NDArray[np.bool_]
+        NDArray
             Boolean mask of outliers.
         """
         beta, gamma = self.get_vars(var)
@@ -310,13 +308,13 @@ class LimeTr:
         a = norm.ppf(0.5 + 0.5 * self.inlier_pct)
         return np.abs(r) > a * s
 
-    def get_model_init(self) -> NDArray[np.floating]:
+    def get_model_init(self) -> NDArray:
         """
         Get model initializations
 
         Returns
         -------
-        NDArray[np.floating]
+        NDArray
             Return the initialization variables.
         """
         beta = np.zeros(self.fevar.size)
@@ -331,7 +329,7 @@ class LimeTr:
 
     def _fit_model(
         self,
-        var: NDArray[np.floating] | None = None,
+        var: NDArray | None = None,
         options: dict | None = None,
     ) -> None:
         """
@@ -339,7 +337,7 @@ class LimeTr:
 
         Parameters
         ----------
-        var : NDArray[np.floating] | None, optional
+        var : NDArray | None, optional
             Initial guess of the variable, by default None
         options : dict | None, optional
             scipy optimizer options, by default None
@@ -382,7 +380,7 @@ class LimeTr:
 
     def fit_model(
         self,
-        var: NDArray[np.floating] | None = None,
+        var: NDArray | None = None,
         trim_steps: int = 3,
         options: dict | None = None,
     ) -> None:
@@ -391,7 +389,7 @@ class LimeTr:
 
         Parameters
         ----------
-        var : NDArray[np.floating] | None, optional
+        var : NDArray | None, optional
             Initial guess of the variable, by default None
         trim_steps : int, optional
             Number of trimming steps, by default 3
@@ -418,19 +416,17 @@ class LimeTr:
                     self._fit_model(var=self.result.x, options=options)
                     index = self.detect_outliers(self.result.x)
 
-    def get_random_effects(
-        self, var: NDArray[np.floating]
-    ) -> NDArray[np.floating]:
+    def get_random_effects(self, var: NDArray) -> NDArray:
         """
         Estimate random effects given beta and gamma
 
         Parameters
         ----------
-        var : NDArray[np.floating]
+        var : NDArray
 
         Returns
         -------
-        NDArray[np.floating]
+        NDArray
             An array contains random effects.
         """
         beta, gamma = self.get_vars(var)
@@ -454,7 +450,7 @@ class LimeTr:
         return random_effects
 
     @property
-    def soln(self) -> dict[str, NDArray[np.floating]]:
+    def soln(self) -> dict[str, NDArray]:
         """Solution summary"""
         if self.result is None:
             raise ValueError("Please fit the model first.")

@@ -202,13 +202,13 @@ class Variable:
         self.linear_gpriors = []
         self.linear_upriors = []
 
-    def prior_objective(self, var: NDArray[np.floating]) -> float:
+    def prior_objective(self, var: NDArray) -> float:
         """
         Objective function from Gaussian prior and linear Gaussian priors.
 
         Parameters
         ----------
-        var : NDArray[np.floating]
+        var : NDArray
             Variables.
 
         Returns
@@ -221,18 +221,18 @@ class Variable:
             val += prior.objective(var)
         return val
 
-    def prior_gradient(self, var: NDArray[np.floating]) -> NDArray[np.floating]:
+    def prior_gradient(self, var: NDArray) -> NDArray:
         """
         Gradient function from Gaussian prior and linear Gaussian priors.
 
         Parameters
         ----------
-        var : NDArray[np.floating]
+        var : NDArray
             Variables.
 
         Returns
         -------
-        NDArray[np.floating]
+        NDArray
             Gradient at given value.
         """
         val = self.gprior.gradient(var)
@@ -240,18 +240,18 @@ class Variable:
             val += prior.gradient(var)
         return val
 
-    def prior_hessian(self, var: NDArray[np.floating]) -> NDArray[np.floating]:
+    def prior_hessian(self, var: NDArray) -> NDArray:
         """
         Hessian function from Gaussian prior and linear Gaussian priors.
 
         Parameters
         ----------
-        var : NDArray[np.floating]
+        var : NDArray
             Variables.
 
         Returns
         -------
-        NDArray[np.floating]
+        NDArray
             Hessian at given value.
         """
         val = self.gprior.hessian(var)
@@ -259,13 +259,13 @@ class Variable:
             val += prior.hessian(var)
         return val
 
-    def get_uprior_info(self) -> NDArray[np.floating]:
+    def get_uprior_info(self) -> NDArray:
         """
         Get Uniform prior information
 
         Returns
         -------
-        NDArray[np.floating]
+        NDArray
             Lower and upper bounds of the prior.
         """
         if self.uprior is None:
@@ -274,13 +274,13 @@ class Variable:
             uprior = self.uprior
         return uprior.info
 
-    def get_linear_upriors_mat(self) -> NDArray[np.floating]:
+    def get_linear_upriors_mat(self) -> NDArray:
         """
         Get linear Uniform prior linear mapping
 
         Returns
         -------
-        NDArray[np.floating]
+        NDArray
             Linear mapping of the prior.
         """
         if len(self.linear_upriors) == 0:
@@ -289,13 +289,13 @@ class Variable:
             mat = np.vstack([prior.mat for prior in self.linear_upriors])
         return mat
 
-    def get_linear_upriors_info(self) -> NDArray[np.floating]:
+    def get_linear_upriors_info(self) -> NDArray:
         """
         Get linear Uniform prior information
 
         Returns
         -------
-        NDArray[np.floating]
+        NDArray
             Lower and upper bounds of the prior.
         """
         if len(self.linear_upriors) == 0:

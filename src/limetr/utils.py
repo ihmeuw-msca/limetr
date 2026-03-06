@@ -43,13 +43,13 @@ def split_by_sizes(
     return np.split(array, np.cumsum(sizes)[:-1], axis=axis)
 
 
-def empty_array() -> NDArray[np.floating]:
+def empty_array() -> NDArray:
     """
     Function used for 'default_factory', creates and returns empty array.
 
     Returns
     -------
-    NDArray[np.floating]
+    NDArray
         An empty array with ``dtype`` being ``float``.
     """
     return np.array([])

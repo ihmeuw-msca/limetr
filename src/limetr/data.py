@@ -21,14 +21,14 @@ class Data:
 
     Attributes
     ----------
-    obs : NDArray[np.floating]
+    obs : NDArray
         Observations. Assumed to be sorted by the group id.
-    obs_se : NDArray[np.floating]
+    obs_se : NDArray
         Standard deviations of observation. Default is one for each observation.
-    group_sizes : NDArray[np.integer]
+    group_sizes : NDArray
         Number of observations for each group. Default treat every observation
         as a group by itself.
-    weight : NDArray[np.floating]
+    weight : NDArray
         Weights for each observation. Default is one for each observation.
     """
 
